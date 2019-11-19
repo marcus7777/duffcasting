@@ -47,15 +47,15 @@
       <v-card dark flat tile width="100%" class="lighten-1 text-center"
       >
         <v-card-text>
-	  <a href="https://www.pushtable.com/dashboard">Content Management</a>
-	  <a href="https://console.firebase.google.com">Hosting</a>
-	  <a href="https://github.com/marcus7777/duffcasting">Source Code</a>
+          <a href="https://www.pushtable.com/dashboard">Content Management</a> |
+          <a href="https://console.firebase.google.com">Hosting</a> |
+          <a href="https://github.com/marcus7777/duffcasting">Source Code</a>
         </v-card-text>
 
         <v-divider></v-divider>
 
         <v-card-text class="white--text">
-          {{ new Date().getFullYear() }} ~ <strong>Maureen Duff</strong>
+           © {{ new Date().getFullYear() }} ~ <strong>Maureen Duff</strong>
         </v-card-text>
       </v-card>
     </v-footer>
