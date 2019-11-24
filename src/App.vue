@@ -1,34 +1,26 @@
 <template>
-  <v-app>
-    <v-app-bar app >
-      <div class="d-flex align-center">
-        <v-toolbar-title>Maureen Duff ~ Casting</v-toolbar-title>
-      </div>
+  <v-app v-if="open">
+    <v-app-bar app height="100">
+      <v-img max-width=250 style="height:60px;" src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
 
       <v-spacer></v-spacer>
 
       <div class="d-flex align-center">
-        <v-btn>Info</v-btn>
-        <v-btn>CV</v-btn>
+        <v-btn v-for="(l, k) in menu" :key="k">{{l.menu}}</v-btn>
       </div>
     </v-app-bar>
 
     <v-content>
-      <v-carousel cycle hide-delimiters show-arrows-on-hover style="height:170px;background: #000;" >
+      <v-carousel cycle hide-delimiters show-arrows-on-hover style="height:270px;background: #FFF;" >
         <v-carousel-item v-for="(slide, i) in inSlideShow(cv)" :key="i" hide-delimiters >
-          <div style="top:0;white-space: nowrap; background: #000;">
-            <span v-for="(l, k) in holes" :key="k" style="background: #fff; border-radius: 5px; width:15px; height:15px; margin:11px 15px 0 0 ;display: inline-block;" >
-            </span>
-          </div>
           <v-sheet>
-            <v-row style="height:100px" align="center" justify="center" >
-             <div class="display-3">{{ slide.name }}</div>
+            <v-row style="padding-top:15px;height:260px;background: #FFF;" align="center" justify="center" >
+             <div v-if="!slide.Poster_1">{{ slide.name }}</div>
+             <v-img v-if="slide.Poster_1" contain height=250 width=80 :src="slide.Poster_1" />
+             <v-img v-if="slide.Poster_2" contain height=250 width=80 :src="slide.Poster_2" />
+             <v-img v-if="slide.Poster_3" contain height=250 width=80 :src="slide.Poster_3" />
             </v-row>
           </v-sheet>
-          <div style="bottom:0;white-space: nowrap; background: #000;">
-            <span v-for="(l, k) in holes" :key="k" style="background: #fff; border-radius: 5px; width:15px; height:15px; margin:11px 15px 0 0 ;display: inline-block;" >
-            </span>
-          </div>
         </v-carousel-item>
       </v-carousel>
 
@@ -69,7 +61,7 @@ export default {
   methods: {
     cvfilter(cv, cat) {
       return cv.reduce((a, p) => {
-        if (p.Categories.replace(/^\d+/g,"") === cat) {
+        if (p && p.Categories && p.Categories.replace(/^\d+/g,"") === cat) {
           a.push(p)
         }
         return a
@@ -93,8 +85,22 @@ export default {
     },
   },
   data() {
+    let open = false
+    if (window.location.hash === "#open") {
+      open = true
+    }
     this.getData(data => {
       this.data = data
+      this.menu = Object.keys(data.pages).map(k => {
+        return data.pages[k]
+      }).sort((a, b) => {
+        return +a.priority < +b.priority
+      }).reduce((a, b) => {
+        if (b.menu) {
+          a.push(b)
+        }
+        return a
+      },[])
       this.cv = Object.keys(data.cv).map(k => {
         return data.cv[k]
       }).sort((a, b) => {
@@ -104,9 +110,11 @@ export default {
         a[p.Categories] = 1
         return a
       }, {})).sort().map(p => p.replace(/^\d+/g,""))
-
     })
     return {
+      open,
+      menu: [],
+      pages: [],
       data: {},
       cv: [],
       Categories: [],
