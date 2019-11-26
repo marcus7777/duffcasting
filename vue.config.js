@@ -1,5 +1,12 @@
 module.exports = {
-  "transpileDependencies": [
+  transpileDependencies: [
     "vuetify"
-  ]
+  ],
+  pwa: {
+    name: "Maureen Duff Casting",
+    themeColor: "#fff",
+    manifestOptions: {
+      start_url: "./#open",
+    }
+  }
 }
