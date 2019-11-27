@@ -1,22 +1,21 @@
 <template>
-  <v-app v-if="open">
-    <v-app-bar flat app height="100">
-      <v-img max-width=300 height=60 src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
-
+  <v-app>
+    <v-app-bar flat app height="110">
+      <v-img max-width=300 height=110 src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
       <v-spacer></v-spacer>
-      <div class="d-flex align-center">
+      <div @click="goDown()" class="d-flex align-center">
         <router-link v-for="(l, k) in menu" :key="k" :to="toPath(l.menu)">{{l.menu}}</router-link>
       </div>
     </v-app-bar>
 
     <v-content>
-      <v-carousel v-if='$route.path !== "/cv"' cycle hide-delimiters show-arrows-on-hover style="height:320px;background: #FFF;" >
-        <v-carousel-item reverse-transition="fade-transition" transition="fade-transition" v-for="(slide, i) in inSlideShow(cv)" :key="i" hide-delimiters >
-          <v-img contain height=320 :src="slide" />
+      <v-carousel height="57vmin" v-if='$route.path !== "/cv"' cycle hide-delimiters show-arrows-on-hover style="height:57vmin;background: #FFF;" >
+        <v-carousel-item width="100%" height="57vmin" reverse-transition="fade-transition" transition="fade-transition" v-for="(slide, i) in inSlideShow(cv)" :key="i" hide-delimiters >
+          <v-img :src="slide" contain height="57vmin" style="margin:auto" />
         </v-carousel-item>
       </v-carousel>
-      <v-card-text>
-        <div v-html="getPage($route.path)" />
+      <v-card-text style="text-align:justify;max-width:960px;padding-top:50px;margin: auto">
+        <div id="text" v-html="getPage($route.path)" />
       </v-card-text>
       <div v-if='$route.path === "/cv"'>
         <div style="margin:10px" v-for="(Category, i) in Categories" :key="i" >
@@ -36,7 +35,10 @@
         <v-card-text>
           <a href="https://www.pushtable.com/dashboard">Content Management</a> |
           <a href="https://console.firebase.google.com">Hosting</a> |
-          <a href="https://github.com/marcus7777/duffcasting">Source Code</a>
+          <a href="https://github.com/marcus7777/duffcasting">Source Code</a> |
+          <span v-for="(l, k) in footer" :key="k"><span v-if="k"> | </span>
+            <router-link :to="toPath(l.name)">{{l.name}}</router-link>
+          </span>
         </v-card-text>
 
         <v-divider />
@@ -54,6 +56,9 @@
 export default {
   name: 'App',
   methods: {
+    goDown() {
+      this.$nextTick(() => this.$refs.text.scrollIntoView(true))
+    },
     cvfilter(cv, cat) {
       return cv.reduce((a, p) => {
         if (p && p.Categories && p.Categories.replace(/^\d+/g,"") === cat) {
@@ -102,42 +107,43 @@ export default {
       }
     },
   },
-  computed: {
-    Categories: function (){
-      if (this.cv) {
-        return Object.keys(this.cv.reduce((a, p) => {
+  watch: { 
+    cv: function (cv){
+      if (cv) {
+        this.Categories =  Object.keys(cv.reduce((a, p) => {
           a[p.Categories] = 1
           return a
         }, {})).sort().map(p => p.replace(/^\d+/g,""))
       } else {
-        return []
+        this.Categories = []
       }
     },
-    menu: function () {
-      if (this.loadedData && this.loadedData.pages) {
-        return Object.keys(this.loadedData.pages).map(k => {
-          return this.loadedData.pages[k]
+    loadedData: function (loadedData) {
+      if (loadedData && loadedData.pages) {
+        const pages = Object.keys(loadedData.pages).map(k => {
+          return loadedData.pages[k]
         }).sort((a, b) => {
           return +a.priority < +b.priority
-        }).reduce((a, b) => {
+        })
+        this.menu = pages.reduce((a, b) => {
           if (b.menu) {
             a.push(b)
           }
           return a
         },[])
-      } else {
-        return []
+        this.footer = pages.reduce((a, b) => {
+          if (!b.menu) {
+            a.push(b)
+          }
+          return a
+        },[])
       }
-    },
-    cv: function () {
-      if (this.loadedData) {
-        return Object.keys(this.loadedData.cv).map(k => {
-          return this.loadedData.cv[k]
+      if (loadedData && loadedData.cv) {
+        this.cv = Object.keys(loadedData.cv).map(k => {
+          return loadedData.cv[k]
         }).sort((a, b) => {
           return +a.Year < +b.Year
         })
-      } else {
-        return []
       }
     },
   },
@@ -145,14 +151,13 @@ export default {
     this.getData(data => {
       this.loadedData = data
     })
-    let open = true
-    if (window.location.hash === "#open") {
-      open = true
-    }
     return {
-      open,
+      cv: [],
+      menu: [],
       pages: [],
-      data: {},
+      footer: [],
+      loadedData: {},
+      Categories: [],
       cvHeaders: [
         {text:"Project",value:"name"},
         {text:"Director", value:"Director"},

@@ -9,26 +9,21 @@ const router = new VueRouter({
   routes: [{path:"/"}] 
 })
 
-
 Vue.config.productionTip = false
 Vue.use(VueRouter)
 
-var requestURL = "https://maureenduffcasting-c8651.firebaseio.com/.json"
-var request = new XMLHttpRequest();
-request.open('GET', requestURL);
-request.responseType = 'json';
-request.onload = function() {
-  localStorage.setItem("d", JSON.stringify(request.response));
-}
-request.send();
-
 Vue.prototype.getData = function(cb) {
-  if (localStorage.getItem("d")) {
-    cb(JSON.parse(localStorage.getItem("d")))
-  }
+  const requestURL = "https://maureenduffcasting-c8651.firebaseio.com/.json"
+  let request = new XMLHttpRequest();
+  request.open('GET', requestURL);
+  request.responseType = 'json';
   request.onload = function() {
     localStorage.setItem("d", JSON.stringify(request.response));
     cb(request.response)
+  }
+  request.send();
+  if (localStorage.getItem("d")) {
+    cb(JSON.parse(localStorage.getItem("d")))
   }
 }
 
