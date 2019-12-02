@@ -4,9 +4,9 @@ import vuetify from './plugins/vuetify';
 import VueRouter from 'vue-router'
 import './registerServiceWorker'
 
-const router = new VueRouter({ 
-  mode: 'history', 
-  routes: [{path:"/"}] 
+const router = new VueRouter({
+  mode: 'history',
+  routes: [{path:"/"}]
 })
 
 Vue.config.productionTip = false
@@ -18,8 +18,10 @@ Vue.prototype.getData = function(cb) {
   request.open('GET', requestURL);
   request.responseType = 'json';
   request.onload = function() {
-    localStorage.setItem("d", JSON.stringify(request.response));
-    cb(request.response)
+    if (request.response) {
+      localStorage.setItem("d", JSON.stringify(request.response));
+      cb(request.response)
+    }
   }
   request.send();
   if (localStorage.getItem("d")) {

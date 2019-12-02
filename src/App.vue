@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar flat app height="110">
+    <v-app-bar flat app height="110" style="z-index:1000">
       <v-img max-width=300 height=110 src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
       <v-spacer></v-spacer>
       <div @click="goDown()" class="d-flex align-center">
@@ -9,11 +9,11 @@
     </v-app-bar>
 
     <v-content>
-      <v-carousel height="57vmin" v-if='$route.path !== "/cv"' cycle hide-delimiters show-arrows-on-hover style="height:57vmin;background: #FFF;" >
-        <v-carousel-item width="100%" height="57vmin" reverse-transition="fade-transition" transition="fade-transition" v-for="(slide, i) in inSlideShow(cv)" :key="i" hide-delimiters >
+      <slider animation="fade" height="57vmin" v-if='$route.path !== "/cv"' speed="5000" interval="10000" style="height:57vmin;background: #FFF;" >
+        <slider-item width="100%" height="57vmin" v-for="(slide, i) in inSlideShow(cv)" :key="i" hide-delimiters >
           <v-img :src="slide" contain height="57vmin" style="margin:auto" />
-        </v-carousel-item>
-      </v-carousel>
+        </slider-item>
+      </slider>
       <v-card-text style="text-align:justify;max-width:960px;padding-top:50px;margin: auto">
         <div id="text" v-html="getPage($route.path)" />
       </v-card-text>
@@ -51,10 +51,30 @@
   </v-app>
 </template>
 
+<style>
+  body .fade-transition-enter-active, 
+  body .fade-transition-leave-active {
+    transition: 2.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+  } 
+  body .fade-transition-move {
+    transition: transform 5.6s;
+  } 
+  body .fade-transition-enter, 
+  body .fade-transition-leave-to {
+    opacity: .5 !important;
+  } 
+</style>
+
+
 <script>
+import { Slider, SliderItem } from 'vue-easy-slider'
 
 export default {
   name: 'App',
+  components: {
+    Slider,
+    SliderItem,
+  },
   methods: {
     goDown() {
       this.$nextTick(() => this.$refs.text.scrollIntoView(true))
