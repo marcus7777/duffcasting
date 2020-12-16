@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "cv": {
+      ".read": true,
+      ".write": false
+    },
+    "pages": {
+      ".read": true,
+      ".write": false
+    },
+    
+    ".read": true,
+    ".write": false
+  }
+}
