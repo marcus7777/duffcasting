@@ -1,21 +1,37 @@
 <template>
   <v-app>
     <v-app-bar flat app height="110" style="z-index:1000">
-      <v-img max-width=300 height=110 src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
+      <router-link to="/" style="height: 110px;width: 300px;" >
+        <v-img max-width=300 height=110 src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
+      </router-link>
       <v-spacer></v-spacer>
-      <div @click="goDown()" class="d-flex align-center">
-        <router-link v-for="(l, k) in menu" :key="k" :to="toPath(l.menu)">{{l.menu}}</router-link>
+      <div class="d-flex align-center">
+        <router-link style="font-size: calc(2vmin + 5px);" v-for="(l, k) in menu" :key="k" :to="toPath(l.menu)">{{l.menu}}</router-link>
       </div>
     </v-app-bar>
-
     <v-content>
-      <slider animation="fade" height="57vmin" v-if='$route.path !== "/cv"' speed="5000" interval="10000" style="height:57vmin;background: #FFF;" >
+      <slider animation="fade" height="57vmin" v-if='($route.path !== "/cv" && $route.path !== "/projects")' :speed="5000" :interval="10000" style="height:57vmin;background: #FFF;" >
         <slider-item width="100%" height="57vmin" v-for="(slide, i) in inSlideShow(cv)" :key="i" hide-delimiters >
-          <v-img :src="slide" contain height="57vmin" style="margin:auto" />
+          <div style="padding:3px 10px;margin:50vmin 20px 10px;font-size: 3.5vmin;position: absolute;z-index: 100;background: #ffffffa7;">
+            <h2> {{slide.title}} </h2>
+          </div>
+          <v-img :src="slide.pic" contain height="57vmin" style="margin:auto" />
         </slider-item>
       </slider>
+      <div v-if='$route.path === "/"'>
+        <v-img max-width=100% contain height=30vmin src="@/assets/MureenDuffCasting.svg" title="Maureen Duff ~ Casting" />
+      </div>
       <v-card-text style="text-align:justify;max-width:960px;padding-top:50px;margin: auto">
-        <div id="text" v-html="getPage($route.path)" />
+        <v-row v-if="getPageRight($route.path)">
+          <v-col sm="6" xs="12">
+            <div id="text" v-html="getPage($route.path)" />
+          </v-col>
+          <v-col sm="6" xs="12">
+            <div id="textRight" v-html="getPageRight($route.path)" />
+          </v-col>
+        </v-row>
+
+        <div v-if="!getPageRight($route.path)" id="text" v-html="getPage($route.path)" />
       </v-card-text>
       <div v-if='$route.path === "/cv"'>
         <div style="margin:10px" v-for="(Category, i) in Categories" :key="i" >
@@ -29,13 +45,24 @@
           </v-sheet>
         </div>
       </div>
+      <div v-if='$route.path === "/projects"'>
+        <h2>Projects</h2>
+        <v-container class="grey lighten-5">
+          <v-row class="mb-6">
+            <v-col v-for="(project, k) in projects(cv)" :key="k" sm="4" xs="6" >
+              <v-img :title="project.name" height="300" :src="project.Poster_For_Project_Page" />
+            </v-col>
+          </v-row>
+	</v-container>
+      </div>
+
     </v-content>
     <v-footer v-bind="localAttrs" padless >
       <v-card dark flat tile width="100%" class="lighten-1 text-center">
         <v-card-text>
-          <a href="https://www.pushtable.com/dashboard">Content Management</a> |
-          <a href="https://console.firebase.google.com">Hosting</a> |
-          <a href="https://github.com/marcus7777/duffcasting">Source Code</a> |
+          <a href="https://www.pushtable.com/dashboard">Content</a> |
+          <a href="https://console.firebase.google.com">Hosted</a> |
+          <a href="https://github.com/marcus7777/duffcasting">Code</a> |
           <span v-for="(l, k) in footer" :key="k"><span v-if="k"> | </span>
             <router-link :to="toPath(l.name)">{{l.name}}</router-link>
           </span>
@@ -51,21 +78,6 @@
   </v-app>
 </template>
 
-<style>
-  body .fade-transition-enter-active, 
-  body .fade-transition-leave-active {
-    transition: 2.3s cubic-bezier(0.25, 0.8, 0.5, 1);
-  } 
-  body .fade-transition-move {
-    transition: transform 5.6s;
-  } 
-  body .fade-transition-enter, 
-  body .fade-transition-leave-to {
-    opacity: .5 !important;
-  } 
-</style>
-
-
 <script>
 import { Slider, SliderItem } from 'vue-easy-slider'
 
@@ -76,12 +88,17 @@ export default {
     SliderItem,
   },
   methods: {
-    goDown() {
-      this.$nextTick(() => this.$refs.text.scrollIntoView(true))
-    },
     cvfilter(cv, cat) {
       return cv.reduce((a, p) => {
         if (p && p.Categories && p.Categories.replace(/^\d+/g,"") === cat) {
+          a.push(p)
+        }
+        return a
+      }, [])
+    },
+    projects(cv) {
+      return cv.reduce((a, p) => {
+        if (p && p.Project_page) {
           a.push(p)
         }
         return a
@@ -91,17 +108,27 @@ export default {
       return cv.reduce((a, p) => {
         if (p.Slide_Show) {
           if (p.Poster_1) {
-            a.push(p.Poster_1)
+            let title = p.Poster_1_title || "99"
+            a.push({pic: p.Poster_1, title})
           }
           if (p.Poster_2) {
-            a.push(p.Poster_2)
+            let title = p.Poster_2_title || "99"
+            a.push({pic: p.Poster_2, title})
           }
           if (p.Poster_3) {
-            a.push(p.Poster_3)
+            let title = p.Poster_3_title || "99"
+            a.push({pic: p.Poster_3, title})
           }
         }
         return a
-      }, [])
+      }, []).sort((a, b) => {
+        return +((a.title).split(" ")[0]) > +((b.title).split(" ")[0])
+      }).map(a => {
+        return {
+          pic: a.pic,
+          title: a.title.replace(/^\d+/g,"")
+        }
+      })
     },
     allImportant(cv) {
       return cv.reduce((a, p, i) => {
@@ -119,6 +146,18 @@ export default {
         return Object.keys(this.loadedData.pages).reduce((a, page) => {
           if ("/" + this.toPath(this.loadedData.pages[page].name) === path && this.loadedData.pages[page].content ) {
             a = this.loadedData.pages[page].content
+          }
+          return a
+        }, "")
+      } else {
+        return ""
+      }
+    },
+    getPageRight(path) {
+      if (this.loadedData && this.loadedData.pages) {
+        return Object.keys(this.loadedData.pages).reduce((a, page) => {
+          if ("/" + this.toPath(this.loadedData.pages[page].name) === path && this.loadedData.pages[page].content_right ) {
+            a = this.loadedData.pages[page].content_right
           }
           return a
         }, "")
